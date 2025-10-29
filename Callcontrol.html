@@ -13,6 +13,8 @@
             --danger-color: #dc3545;
             --info-color: #17a2b8;
             /* For hold/resume */
+            --go-button-color: #6f42c1;
+            /* Purple for Go button */
             --background-color: #f8f9fa;
             --card-background: #ffffff;
             --text-color: #343a40;
@@ -53,6 +55,23 @@
             font-weight: 600;
         }
 
+        .instruction-text {
+            margin-bottom: 25px;
+            text-align: left;
+            font-size: 0.95em;
+            color: var(--text-color);
+        }
+
+        .instruction-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .instruction-text a:hover {
+            text-decoration: underline;
+        }
+
+
         .input-group {
             margin-bottom: 25px;
             text-align: left;
@@ -66,7 +85,8 @@
             font-size: 0.95em;
         }
 
-        .input-group input[type="text"] {
+        .input-group input[type="text"],
+        .input-group select {
             width: calc(100% - 20px);
             padding: 12px 10px;
             border: 1px solid var(--border-color);
@@ -74,13 +94,93 @@
             font-size: 1em;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             box-sizing: border-box;
+            background-color: var(--card-background);
+            /* Ensure select has background */
+            color: var(--text-color);
         }
 
-        .input-group input[type="text"]:focus {
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
             outline: none;
         }
+
+        .api-key-section {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .api-key-section .input-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+            /* Override default margin */
+        }
+
+        .api-key-section button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--go-button-color);
+            color: white;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px var(--shadow-light);
+        }
+
+        .api-key-section button:hover:not(:disabled) {
+            background-color: #5a2d9a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+
+        .api-key-section button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
+        .device-selection-section {
+            margin-top: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .device-selection-section .input-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+
+        .device-selection-section button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px var(--shadow-light);
+        }
+
+        .device-selection-section button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+
+        .device-selection-section button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
 
         .button-grid {
             display: grid;
@@ -199,12 +299,18 @@
             text-align: left;
             min-height: 50px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            /* Allow content to stack vertically */
             justify-content: center;
             word-break: break-all;
             background-color: var(--background-color);
             border: 1px solid var(--border-color);
             color: var(--text-color);
+        }
+
+        #statusMessage a {
+            margin-top: 5px;
+            /* Add some space above the link */
         }
 
         .status-success {
@@ -231,9 +337,30 @@
     <div class="container">
         <h1>Webex Telephony Control</h1>
 
-        <div class="input-group">
-            <label for="apiKey">Webex API Key (Bearer Token):</label>
-            <input type="text" id="apiKey" placeholder="Enter your API Key here">
+        <p class="instruction-text">
+            Browse to <a href="https://developer.webex.com/" target="_blank">https://developer.webex.com/</a> and log
+            in.
+            Click your avatar in the top right, and copy out your bearer token.
+            Enter it in the box below and continue to control phones.
+        </p>
+
+        <div class="api-key-section">
+            <div class="input-group">
+                <label for="apiKey">Webex API Key (Bearer Token):</label>
+                <input type="text" id="apiKey" placeholder="Enter your API Key here">
+            </div>
+            <button id="goButton">Go</button>
+        </div>
+
+        <!-- Moved device selection section here -->
+        <div class="device-selection-section" id="deviceSelectionSection">
+            <div class="input-group">
+                <label for="endpointSelect">Select Device:</label>
+                <select id="endpointSelect">
+                    <option value="">No devices found</option>
+                </select>
+            </div>
+            <button id="controlPhoneButton">Control Phone</button>
         </div>
 
         <div class="input-group">
@@ -264,62 +391,96 @@
         </div>
 
         <div id="statusMessage">
-            Enter your API Key and Destination, then click Dial to start a call.
+            Enter your API Key and click Go to begin.
         </div>
     </div>
 
     <script>
         const apiKeyInput = document.getElementById('apiKey');
+        const goButton = document.getElementById('goButton');
         const destinationNumberInput = document.getElementById('destinationNumber');
+        const deviceSelectionSection = document.getElementById('deviceSelectionSection');
+        const endpointSelect = document.getElementById('endpointSelect');
+        const controlPhoneButton = document.getElementById('controlPhoneButton');
         const dialButton = document.getElementById('dialButton');
         const hangupButton = document.getElementById('hangupButton');
         const holdButton = document.getElementById('holdButton');
         const resumeButton = document.getElementById('resumeButton');
-        const dtmfKeys = document.querySelectorAll('.dtmf-key'); // Select all DTMF buttons
+        const dtmfKeys = document.querySelectorAll('.dtmf-key');
         const statusMessage = document.getElementById('statusMessage');
 
-        let currentCallId = null; // Stores the callId from a successful dial
+        let currentCallId = null;
         let callState = 'idle'; // 'idle', 'active', 'held'
+        let personId = null; // Stores the personId from /people/me
+        let selectedEndpointId = null; // Stores the endpointId from device selection
+        let lastApiTriggered = null; // Stores the name of the last API successfully triggered
 
+        // --- API Reference Links ---
+        const apiDocs = {
+            'transmitDtmf': 'https://developer.webex.com/calling/docs/api/v1/call-controls/transmit-dtmf',
+            'dial': 'https://developer.webex.com/calling/docs/api/v1/call-controls/dial',
+            'hangup': 'https://developer.webex.com/calling/docs/api/v1/call-controls/hangup',
+            'hold': 'https://developer.webex.com/calling/docs/api/v1/call-controls/hold',
+            'resume': 'https://developer.webex.com/calling/docs/api/v1/call-controls/resume',
+            'getPreferredAnswerEndpoint': 'https://developer.webex.com/calling/docs/api/v1/user-call-settings-2-2/get-preferred-answer-endpoint',
+            'getPeopleMe': 'https://developer.webex.com/docs/api/v1/people/get-my-own-details' // Corrected link
+        };
+
+        // --- Utility Functions ---
         function setStatus(message, type = '') {
-            statusMessage.textContent = message;
-            statusMessage.className = ''; // Clear previous classes
-            statusMessage.classList.add('status-message'); // Base class
+            let fullMessage = message;
+            if (lastApiTriggered && apiDocs[lastApiTriggered]) {
+                // Add <br> to put the link on a new line
+                fullMessage += `<br><a href="${apiDocs[lastApiTriggered]}" target="_blank" style="color: inherit; text-decoration: underline;">(API Triggered: ${lastApiTriggered})</a>`;
+            }
+            statusMessage.innerHTML = fullMessage; // Use innerHTML to render the link
+            statusMessage.className = '';
+            statusMessage.classList.add('status-message');
             if (type) {
                 statusMessage.classList.add(`status-${type}`);
             }
         }
 
+        // --- Button State Management ---
         function updateButtonStates() {
-            dialButton.disabled = false; // Dial is generally always available to start a new call or retry
+            const hasApiKeyInInput = apiKeyInput.value.trim() !== '';
+            const hasPersonId = personId !== null;
+            const hasSelectedEndpoint = selectedEndpointId !== null && selectedEndpointId !== ''; // Ensure it's not just an empty string
+            const hasActiveCall = currentCallId !== null;
 
-            if (currentCallId === null) {
-                hangupButton.disabled = true;
-                holdButton.disabled = true;
-                resumeButton.disabled = true;
-                dtmfKeys.forEach(button => button.disabled = true); // Disable DTMF when no call
-            } else {
-                hangupButton.disabled = false;
-                dtmfKeys.forEach(button => button.disabled = false); // Enable DTMF when call exists
+            // API Key input and Go button logic
+            apiKeyInput.disabled = hasPersonId; // Disable API key input ONLY if personId is successfully fetched
+            goButton.disabled = !hasApiKeyInInput || hasPersonId; // Disable 'Go' if no API key or if already fetched personId
 
-                if (callState === 'active') {
-                    holdButton.disabled = false;
-                    resumeButton.disabled = true;
-                } else if (callState === 'held') {
-                    holdButton.disabled = true;
-                    resumeButton.disabled = false;
-                }
-            }
+            // Device selection section
+            deviceSelectionSection.style.display = hasPersonId ? 'flex' : 'none';
+            endpointSelect.disabled = !hasPersonId;
+            controlPhoneButton.disabled = !hasPersonId || endpointSelect.value === ''; // Enable if personId exists AND a dropdown option is selected
+
+            // Destination number input
+            destinationNumberInput.disabled = !hasSelectedEndpoint;
+
+            // Telephony control buttons (Dial, Hangup, Hold, Resume, DTMF)
+            // These are only enabled if an endpoint is selected AND other conditions are met
+            dialButton.disabled = !hasSelectedEndpoint || hasActiveCall;
+            hangupButton.disabled = !hasSelectedEndpoint || !hasActiveCall;
+            holdButton.disabled = !hasSelectedEndpoint || !hasActiveCall || callState !== 'active';
+            resumeButton.disabled = !hasSelectedEndpoint || !hasActiveCall || callState !== 'held';
+            dtmfKeys.forEach(button => button.disabled = !hasSelectedEndpoint || !hasActiveCall);
         }
 
-        async function makeApiCall(url, method, apiKey, body, successMsg, errorPrefix) {
-            setStatus(`Sending request to ${url.split('/').pop()}...`, 'info'); // Show API endpoint in status
-            // Disable all action buttons during API call to prevent multiple simultaneous requests
-            dialButton.disabled = true;
-            hangupButton.disabled = true;
-            holdButton.disabled = true;
-            resumeButton.disabled = true;
-            dtmfKeys.forEach(button => button.disabled = true);
+        // --- Generic API Call Helper ---
+        async function makeApiCall(url, method, apiKey, body, errorPrefix, apiName, disableSetupButtons = false) {
+            lastApiTriggered = apiName; // Store the API name before making the call
+            setStatus(`Sending request...`, 'info'); // Display initial message with link
+
+            if (disableSetupButtons) {
+                // Temporarily disable only the setup-related interactive elements during API call
+                goButton.disabled = true;
+                apiKeyInput.disabled = true;
+                endpointSelect.disabled = true;
+                controlPhoneButton.disabled = true;
+            }
 
             try {
                 const response = await fetch(url, {
@@ -329,7 +490,7 @@
                         'authorization': `Bearer ${apiKey}`,
                         'content-type': 'application/json'
                     },
-                    body: JSON.stringify(body)
+                    body: body ? JSON.stringify(body) : undefined // Only include body if provided
                 });
 
                 if (!response.ok) {
@@ -337,23 +498,116 @@
                     throw new Error(`API Error: ${response.status} - ${errorData.message || JSON.stringify(errorData)}`);
                 }
 
-                setStatus(successMsg, 'success');
+                // Do NOT set success message here. Let the calling function do it for specific details.
                 return await response.json().catch(() => ({})); // Return data, or empty object if no JSON
             } catch (error) {
                 console.error(`${errorPrefix} API Error:`, error);
-                setStatus(`${errorPrefix} failed: ${error.message}`, 'error');
-                throw error; // Re-throw to allow specific error handling in calling functions
+                setStatus(`${errorPrefix} failed: ${error.message}`, 'error'); // Display error message with persistent link
+                throw error;
             } finally {
-                updateButtonStates(); // Re-enable buttons based on the current state
+                // Always re-evaluate all button states after any API call completes
+                updateButtonStates();
             }
         }
 
+        // --- New API Calls for Initialization ---
+        async function getPeopleMe() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+
+            try {
+                const data = await makeApiCall(
+                    'https://webexapis.com/v1/people/me',
+                    'GET',
+                    apiKey,
+                    null,
+                    'Get People Me', // errorPrefix
+                    'getPeopleMe', // API Name for docs
+                    true // Disable setup buttons during this call
+                );
+                personId = data.id;
+                setStatus(`Welcome, ${data.displayName || 'User'}! Fetching devices...`, 'success');
+                await getPreferredAnswerEndpoint(); // Proceed to fetch endpoints
+            } catch (error) {
+                personId = null;
+                // Status already set by makeApiCall catch block
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        async function getPreferredAnswerEndpoint() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey || !personId) {
+                setStatus('Missing API Key or Person ID.', 'error');
+                return;
+            }
+
+            try {
+                const data = await makeApiCall(
+                    `https://webexapis.com/v1/telephony/config/people/${personId}/preferredAnswerEndpoint`,
+                    'GET',
+                    apiKey,
+                    null,
+                    'Get Preferred Answer Endpoint', // errorPrefix
+                    'getPreferredAnswerEndpoint', // API Name for docs
+                    true // Disable setup buttons during this call
+                );
+
+                // Clear previous options
+                endpointSelect.innerHTML = '<option value="">-- Select a device --</option>';
+                let deviceFound = false;
+
+                if (data && data.endpoints && data.endpoints.length > 0) {
+                    data.endpoints.forEach(endpoint => {
+                        // No filtering, render all endpoints
+                        const option = document.createElement('option');
+                        option.value = endpoint.id;
+                        option.textContent = `${endpoint.name} (${endpoint.type})`; // Show type for clarity
+                        endpointSelect.appendChild(option);
+                        deviceFound = true;
+                    });
+                }
+
+                if (!deviceFound) {
+                    setStatus('No endpoints found for this user.', 'info');
+                    endpointSelect.innerHTML = '<option value="">No devices found</option>';
+                    controlPhoneButton.disabled = true;
+                } else {
+                    setStatus('Please select a device to control.', 'info');
+                    controlPhoneButton.disabled = false;
+                }
+
+            } catch (error) {
+                // Status already set by makeApiCall catch block
+                endpointSelect.innerHTML = '<option value="">Error loading devices</option>';
+                controlPhoneButton.disabled = true;
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        function selectPhoneForControl() {
+            selectedEndpointId = endpointSelect.value;
+            if (selectedEndpointId) {
+                setStatus(`Controlling device: ${endpointSelect.options[endpointSelect.selectedIndex].text}`, 'success');
+            } else {
+                setStatus('Please select a valid device.', 'error');
+            }
+            updateButtonStates();
+        }
+
+
+        // --- Existing Telephony API Calls (modified) ---
         async function dialCall() {
             const apiKey = apiKeyInput.value.trim();
             const destination = destinationNumberInput.value.trim();
 
-            if (!apiKey) {
-                setStatus('Please enter your Webex API Key.', 'error');
+            if (!apiKey || !selectedEndpointId) {
+                setStatus('Missing API Key or selected endpoint.', 'error');
                 return;
             }
             if (!destination) {
@@ -368,10 +622,11 @@
                     apiKey,
                     {
                         "destination": destination,
-                        "endpointId": "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLWVhc3QtMl9hL0NBTExJTkdfREVWSUNFLzg0NWEzZWMyLTdjMDktNGUzMi1hY2QyLTJmMWE4OWM1MGQ5YQ=="
+                        "endpointId": selectedEndpointId // Use the dynamically selected endpoint ID
                     },
-                    `Call initiated successfully to ${destination}!`,
-                    'Dial'
+                    'Dial', // errorPrefix
+                    'dial', // API Name for docs
+                    false // Do NOT disable setup buttons during this call
                 );
                 currentCallId = data.callId;
                 callState = 'active';
@@ -387,12 +642,8 @@
 
         async function hangupCall() {
             const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                setStatus('Please enter your Webex API Key.', 'error');
-                return;
-            }
-            if (!currentCallId) {
-                setStatus('No active call to hang up.', 'error');
+            if (!apiKey || !currentCallId) {
+                setStatus('Missing API Key or no active call to hang up.', 'error');
                 return;
             }
 
@@ -403,13 +654,15 @@
                     'POST',
                     apiKey,
                     { "callId": currentCallId },
-                    'Call hung up successfully!',
-                    'Hangup'
+                    'Hangup', // errorPrefix
+                    'hangup', // API Name for docs
+                    false // Do NOT disable setup buttons during this call
                 );
                 currentCallId = null;
                 callState = 'idle';
+                setStatus('Call hung up successfully!', 'success');
             } catch (error) {
-                callState = previousCallState; // Revert state if hangup fails
+                callState = previousCallState;
             } finally {
                 updateButtonStates();
             }
@@ -417,12 +670,8 @@
 
         async function holdCall() {
             const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                setStatus('Please enter your Webex API Key.', 'error');
-                return;
-            }
-            if (!currentCallId) {
-                setStatus('No active call to hold.', 'error');
+            if (!apiKey || !currentCallId) {
+                setStatus('Missing API Key or no active call to hold.', 'error');
                 return;
             }
             if (callState === 'held') {
@@ -437,12 +686,14 @@
                     'POST',
                     apiKey,
                     { "callId": currentCallId },
-                    'Call placed on hold successfully!',
-                    'Hold'
+                    'Hold', // errorPrefix
+                    'hold', // API Name for docs
+                    false // Do NOT disable setup buttons during this call
                 );
                 callState = 'held';
+                setStatus('Call placed on hold successfully!', 'success');
             } catch (error) {
-                callState = 'active'; // If hold fails, remain in active state
+                callState = 'active';
             } finally {
                 updateButtonStates();
             }
@@ -450,12 +701,8 @@
 
         async function resumeCall() {
             const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                setStatus('Please enter your Webex API Key.', 'error');
-                return;
-            }
-            if (!currentCallId) {
-                setStatus('No call to resume.', 'error');
+            if (!apiKey || !currentCallId) {
+                setStatus('Missing API Key or no call to resume.', 'error');
                 return;
             }
             if (callState === 'active') {
@@ -470,12 +717,14 @@
                     'POST',
                     apiKey,
                     { "callId": currentCallId },
-                    'Call resumed successfully!',
-                    'Resume'
+                    'Resume', // errorPrefix
+                    'resume', // API Name for docs
+                    false // Do NOT disable setup buttons during this call
                 );
                 callState = 'active';
+                setStatus('Call resumed successfully!', 'success');
             } catch (error) {
-                callState = 'held'; // If resume fails, remain in held state
+                callState = 'held';
             } finally {
                 updateButtonStates();
             }
@@ -483,12 +732,8 @@
 
         async function transmitDtmf(dtmfKey) {
             const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                setStatus('Please enter your Webex API Key.', 'error');
-                return;
-            }
-            if (!currentCallId) {
-                setStatus('No active call to send DTMF to.', 'error');
+            if (!apiKey || !currentCallId) {
+                setStatus('Missing API Key or no active call to send DTMF to.', 'error');
                 return;
             }
 
@@ -501,9 +746,11 @@
                         "callId": currentCallId,
                         "dtmf": dtmfKey
                     },
-                    `DTMF '${dtmfKey}' sent successfully!`,
-                    'Transmit DTMF'
+                    'Transmit DTMF', // errorPrefix
+                    'transmitDtmf', // API Name for docs
+                    false // Do NOT disable setup buttons during this call
                 );
+                setStatus(`DTMF '${dtmfKey}' sent successfully!`, 'success');
             } catch (error) {
                 // Error handled by makeApiCall
             } finally {
@@ -511,21 +758,25 @@
             }
         }
 
-        // Event Listeners
+        // --- Event Listeners ---
+        apiKeyInput.addEventListener('input', updateButtonStates);
+        goButton.addEventListener('click', getPeopleMe);
+        controlPhoneButton.addEventListener('click', selectPhoneForControl);
+        endpointSelect.addEventListener('change', updateButtonStates); // Call updateButtonStates directly on change
+
         dialButton.addEventListener('click', dialCall);
         hangupButton.addEventListener('click', hangupCall);
         holdButton.addEventListener('click', holdCall);
         resumeButton.addEventListener('click', resumeCall);
 
-        // Add event listeners for DTMF buttons
         dtmfKeys.forEach(button => {
             button.addEventListener('click', () => {
-                const dtmfValue = button.dataset.dtmf; // Get the DTMF value from data-dtmf attribute
+                const dtmfValue = button.dataset.dtmf;
                 transmitDtmf(dtmfValue);
             });
         });
 
-        // Initialize button states on page load
+        // --- Initial Setup ---
         updateButtonStates();
     </script>
 </body>
