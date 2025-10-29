@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webex Telephony Control</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            /* For hold/resume */
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-color: #dee2e6;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --dtmf-button-color: #f0f0f0;
+            --dtmf-button-text-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-size: 0.95em;
+        }
+
+        .input-group input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input[type="text"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .button-grid button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px var(--shadow-light);
+        }
+
+        .button-grid button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+
+        .button-grid button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
+        #dialButton {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        #dialButton:hover:not(:disabled) {
+            background-color: #218838;
+        }
+
+        #hangupButton {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        #hangupButton:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+
+        #holdButton,
+        #resumeButton {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        #holdButton:hover:not(:disabled),
+        #resumeButton:hover:not(:disabled) {
+            background-color: #138496;
+        }
+
+        button:disabled {
+            background-color: var(--secondary-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .dtmf-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 5px var(--shadow-light);
+        }
+
+        .dtmf-pad button {
+            width: 100%;
+            padding: 15px 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--dtmf-button-color);
+            color: var(--dtmf-button-text-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
+        .dtmf-pad button:hover:not(:disabled) {
+            background-color: #e2e6ea;
+            transform: translateY(-1px);
+        }
+
+        .dtmf-pad button:active:not(:disabled) {
+            background-color: #d3d7db;
+            transform: translateY(0);
+            box-shadow: inset 0 1px 3px var(--shadow-light);
+        }
+
+        .dtmf-pad button:disabled {
+            background-color: #cccccc;
+            color: #888888;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        #statusMessage {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            text-align: left;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-all;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Webex Telephony Control</h1>
+
+        <div class="input-group">
+            <label for="apiKey">Webex API Key (Bearer Token):</label>
+            <input type="text" id="apiKey" placeholder="Enter your API Key here">
+        </div>
+
+        <div class="input-group">
+            <label for="destinationNumber">Destination Number:</label>
+            <input type="text" id="destinationNumber" value="1234" placeholder="e.g., 1234, +15551234567">
+        </div>
+
+        <div class="button-grid">
+            <button id="dialButton">Dial</button>
+            <button id="hangupButton">Hangup</button>
+            <button id="holdButton">Hold</button>
+            <button id="resumeButton">Resume</button>
+        </div>
+
+        <div class="dtmf-pad">
+            <button class="dtmf-key" data-dtmf="1">1</button>
+            <button class="dtmf-key" data-dtmf="2">2</button>
+            <button class="dtmf-key" data-dtmf="3">3</button>
+            <button class="dtmf-key" data-dtmf="4">4</button>
+            <button class="dtmf-key" data-dtmf="5">5</button>
+            <button class="dtmf-key" data-dtmf="6">6</button>
+            <button class="dtmf-key" data-dtmf="7">7</button>
+            <button class="dtmf-key" data-dtmf="8">8</button>
+            <button class="dtmf-key" data-dtmf="9">9</button>
+            <button class="dtmf-key" data-dtmf="*">*</button>
+            <button class="dtmf-key" data-dtmf="0">0</button>
+            <button class="dtmf-key" data-dtmf="#">#</button>
+        </div>
+
+        <div id="statusMessage">
+            Enter your API Key and Destination, then click Dial to start a call.
+        </div>
+    </div>
+
+    <script>
+        const apiKeyInput = document.getElementById('apiKey');
+        const destinationNumberInput = document.getElementById('destinationNumber');
+        const dialButton = document.getElementById('dialButton');
+        const hangupButton = document.getElementById('hangupButton');
+        const holdButton = document.getElementById('holdButton');
+        const resumeButton = document.getElementById('resumeButton');
+        const dtmfKeys = document.querySelectorAll('.dtmf-key'); // Select all DTMF buttons
+        const statusMessage = document.getElementById('statusMessage');
+
+        let currentCallId = null; // Stores the callId from a successful dial
+        let callState = 'idle'; // 'idle', 'active', 'held'
+
+        function setStatus(message, type = '') {
+            statusMessage.textContent = message;
+            statusMessage.className = ''; // Clear previous classes
+            statusMessage.classList.add('status-message'); // Base class
+            if (type) {
+                statusMessage.classList.add(`status-${type}`);
+            }
+        }
+
+        function updateButtonStates() {
+            dialButton.disabled = false; // Dial is generally always available to start a new call or retry
+
+            if (currentCallId === null) {
+                hangupButton.disabled = true;
+                holdButton.disabled = true;
+                resumeButton.disabled = true;
+                dtmfKeys.forEach(button => button.disabled = true); // Disable DTMF when no call
+            } else {
+                hangupButton.disabled = false;
+                dtmfKeys.forEach(button => button.disabled = false); // Enable DTMF when call exists
+
+                if (callState === 'active') {
+                    holdButton.disabled = false;
+                    resumeButton.disabled = true;
+                } else if (callState === 'held') {
+                    holdButton.disabled = true;
+                    resumeButton.disabled = false;
+                }
+            }
+        }
+
+        async function makeApiCall(url, method, apiKey, body, successMsg, errorPrefix) {
+            setStatus(`Sending request to ${url.split('/').pop()}...`, 'info'); // Show API endpoint in status
+            // Disable all action buttons during API call to prevent multiple simultaneous requests
+            dialButton.disabled = true;
+            hangupButton.disabled = true;
+            holdButton.disabled = true;
+            resumeButton.disabled = true;
+            dtmfKeys.forEach(button => button.disabled = true);
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'accept': 'application/json',
+                        'authorization': `Bearer ${apiKey}`,
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Unknown error or no JSON response' }));
+                    throw new Error(`API Error: ${response.status} - ${errorData.message || JSON.stringify(errorData)}`);
+                }
+
+                setStatus(successMsg, 'success');
+                return await response.json().catch(() => ({})); // Return data, or empty object if no JSON
+            } catch (error) {
+                console.error(`${errorPrefix} API Error:`, error);
+                setStatus(`${errorPrefix} failed: ${error.message}`, 'error');
+                throw error; // Re-throw to allow specific error handling in calling functions
+            } finally {
+                updateButtonStates(); // Re-enable buttons based on the current state
+            }
+        }
+
+        async function dialCall() {
+            const apiKey = apiKeyInput.value.trim();
+            const destination = destinationNumberInput.value.trim();
+
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+            if (!destination) {
+                setStatus('Please enter a destination number.', 'error');
+                return;
+            }
+
+            try {
+                const data = await makeApiCall(
+                    'https://webexapis.com/v1/telephony/calls/dial',
+                    'POST',
+                    apiKey,
+                    {
+                        "destination": destination,
+                        "endpointId": "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLWVhc3QtMl9hL0NBTExJTkdfREVWSUNFLzg0NWEzZWMyLTdjMDktNGUzMi1hY2QyLTJmMWE4OWM1MGQ5YQ=="
+                    },
+                    `Call initiated successfully to ${destination}!`,
+                    'Dial'
+                );
+                currentCallId = data.callId;
+                callState = 'active';
+                setStatus(`Call initiated successfully to ${destination}! Call ID: ${currentCallId}`, 'success');
+
+            } catch (error) {
+                currentCallId = null;
+                callState = 'idle';
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        async function hangupCall() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+            if (!currentCallId) {
+                setStatus('No active call to hang up.', 'error');
+                return;
+            }
+
+            const previousCallState = callState;
+            try {
+                await makeApiCall(
+                    'https://webexapis.com/v1/telephony/calls/hangup',
+                    'POST',
+                    apiKey,
+                    { "callId": currentCallId },
+                    'Call hung up successfully!',
+                    'Hangup'
+                );
+                currentCallId = null;
+                callState = 'idle';
+            } catch (error) {
+                callState = previousCallState; // Revert state if hangup fails
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        async function holdCall() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+            if (!currentCallId) {
+                setStatus('No active call to hold.', 'error');
+                return;
+            }
+            if (callState === 'held') {
+                setStatus('Call is already on hold.', 'info');
+                updateButtonStates();
+                return;
+            }
+
+            try {
+                await makeApiCall(
+                    'https://webexapis.com/v1/telephony/calls/hold',
+                    'POST',
+                    apiKey,
+                    { "callId": currentCallId },
+                    'Call placed on hold successfully!',
+                    'Hold'
+                );
+                callState = 'held';
+            } catch (error) {
+                callState = 'active'; // If hold fails, remain in active state
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        async function resumeCall() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+            if (!currentCallId) {
+                setStatus('No call to resume.', 'error');
+                return;
+            }
+            if (callState === 'active') {
+                setStatus('Call is already active (not on hold).', 'info');
+                updateButtonStates();
+                return;
+            }
+
+            try {
+                await makeApiCall(
+                    'https://webexapis.com/v1/telephony/calls/resume',
+                    'POST',
+                    apiKey,
+                    { "callId": currentCallId },
+                    'Call resumed successfully!',
+                    'Resume'
+                );
+                callState = 'active';
+            } catch (error) {
+                callState = 'held'; // If resume fails, remain in held state
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        async function transmitDtmf(dtmfKey) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                setStatus('Please enter your Webex API Key.', 'error');
+                return;
+            }
+            if (!currentCallId) {
+                setStatus('No active call to send DTMF to.', 'error');
+                return;
+            }
+
+            try {
+                await makeApiCall(
+                    'https://webexapis.com/v1/telephony/calls/transmitDtmf',
+                    'POST',
+                    apiKey,
+                    {
+                        "callId": currentCallId,
+                        "dtmf": dtmfKey
+                    },
+                    `DTMF '${dtmfKey}' sent successfully!`,
+                    'Transmit DTMF'
+                );
+            } catch (error) {
+                // Error handled by makeApiCall
+            } finally {
+                updateButtonStates();
+            }
+        }
+
+        // Event Listeners
+        dialButton.addEventListener('click', dialCall);
+        hangupButton.addEventListener('click', hangupCall);
+        holdButton.addEventListener('click', holdCall);
+        resumeButton.addEventListener('click', resumeCall);
+
+        // Add event listeners for DTMF buttons
+        dtmfKeys.forEach(button => {
+            button.addEventListener('click', () => {
+                const dtmfValue = button.dataset.dtmf; // Get the DTMF value from data-dtmf attribute
+                transmitDtmf(dtmfValue);
+            });
+        });
+
+        // Initialize button states on page load
+        updateButtonStates();
+    </script>
+</body>
+
+</html>
