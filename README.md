@@ -14,7 +14,7 @@ This is a simple solution that allows you to control a Webex Calling registered 
 
 ### Solution Video Overview
 
-<a href=https://app.vidcast.io/share/cf3b46c9-12d0-46a2-85b8-32415ea74363?playerMode=vidcast target="_blank"><img src="./vidcast.png"></a>
+<a href="https://app.vidcast.io/share/cf3b46c9-12d0-46a2-85b8-32415ea74363?playerMode=vidcast" target="_blank"><img src="./vidcast.png"></a>
 # Change Log
 
 |Change Title|Date|Details|
