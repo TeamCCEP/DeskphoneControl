@@ -13,9 +13,8 @@ Please contact the CCEP team at [ccep@cisco.com](mailto:ccep@cisco.com?subject=p
 This is a simple solution that allows you to control a Webex Calling registered phone using the personal access token of the owner of that phone.  It is designed to be used as a tool to demonstrate how functions that CTI used to provide can be achieved using Webex Calling call control API's.
 
 ### Solution Video Overview
-[![](./vidcast.png)](https://app.vidcast.io/share/cf3b46c9-12d0-46a2-85b8-32415ea74363?playerMode=vidcast)
 
-
+<a href=https://app.vidcast.io/share/cf3b46c9-12d0-46a2-85b8-32415ea74363?playerMode=vidcast target="_blank"><img src="./vidcast.png"></a>
 # Change Log
 
 |Change Title|Date|Details|
