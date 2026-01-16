@@ -93,8 +93,12 @@
         function log(msg) {
             const el = document.createElement('div');
             el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            output.appendChild(el);
-            output.scrollTop = output.scrollHeight;
+            // Insert at the top
+            if (output.firstChild) {
+                output.insertBefore(el, output.firstChild);
+            } else {
+                output.appendChild(el);
+            }
         }
 
         async function pollAPI() {
