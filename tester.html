@@ -33,6 +33,45 @@
             padding: 20px;
             border-radius: 8px;
         }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #output {
+            margin-top: 20px;
+            max-height: 300px;
+            /* Set your preferred max height */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            border: 1px solid #ccc;
+            /* Optional: visual cue */
+            padding: 10px;
+            /* Optional: spacing */
+            background: #fafafa;
+            /* Optional: subtle background */
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 40px;
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+        #popup-content {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 
