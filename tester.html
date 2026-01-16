@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Webex CDR Feed Poller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 40px;
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+        #popup-content {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Webex CDR Feed Poller</h2>
+    <div id="output"></div>
+    <div id="popup">
+        <div id="popup-content"></div>
+    </div>
+    <script>
+        const output = document.getElementById('output');
+        const popup = document.getElementById('popup');
+        const popupContent = document.getElementById('popup-content');
+        const API_URL = 'https://analytics-calling.webexapis.com/v1/cdr_feed?endTime=2026-01-16T14%3A35%3A00.604Z&startTime=2026-01-16T14%3A24%3A00.604Z';
+        const AUTH_TOKEN = 'MTc3ZWIwY2MtM2EwYy00MGY2LWFlYWUtNDZlNjFkOTdmYTUyN2MyNzczMTUtMzEw_PF84_77dbece8-9e08-4e32-acd2-2f1a89c50d9a';
+
+        let intervalId = null;
+
+        function log(msg) {
+            const el = document.createElement('div');
+            el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            output.appendChild(el);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function pollAPI() {
+            try {
+                const resp = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'accept': 'application/json',
+                        'authorization': 'Bearer ' + AUTH_TOKEN
+                    }
+                });
+                if (resp.status === 200) {
+                    log('Received 200 (OK) from API');
+                } else if (resp.status === 429) {
+                    log('Received 429 (Too Many Requests) from API');
+                } else if (resp.status === 403) {
+                    clearInterval(intervalId);
+                    const data = await resp.text();
+                    popupContent.innerHTML = '<h3>403 Forbidden - Stopping Requests</h3><pre>' +
+                        escapeHtml(data) + '</pre>';
+                    popup.style.display = 'block';
+                    log('Received 403 (Forbidden) from API. Stopped further requests.');
+                }
+            } catch (e) {
+                log('Error: ' + e.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        // Close popup on click
+        popup.addEventListener('click', () => { popup.style.display = 'none'; });
+
+        // Start polling every 2 seconds
+        intervalId = setInterval(pollAPI, 2000);
+        log('Polling started every 2 seconds...');
+    </script>
+</body>
+
+</html>
